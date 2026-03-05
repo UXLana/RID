@@ -467,9 +467,16 @@ input[type="checkbox"]:focus-visible {
 
 /* Input in dark toolbar */
 [data-dark="true"] .mtr-toolbar input {
-  background-color: #292929 !important;
+  background-color: transparent !important;
   color: #FFFFFF !important;
   border-color: #3E3E3E !important;
+}
+
+/* Remove extra backgrounds from inner containers (SelectionInfo, etc) */
+[data-dark="true"] .mtr-toolbar > div > div,
+[data-dark="true"] .mtr-toolbar > div > div > div,
+[data-dark="true"] .mtr-toolbar > div > div > span {
+  background-color: transparent !important;
 }
 
 /* DS Tabs in dark mode */
