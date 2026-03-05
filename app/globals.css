@@ -556,8 +556,14 @@ input[type="checkbox"]:focus-visible {
   color: #FFFFFF !important;
 }
 
-/* Green tint for selected rows — scoped to DataTable wrappers only */
+/* Default (Light Mode) - Copper */
 .copper-highlight {
+  --mtr-selectedHighlight: rgba(212, 149, 88, 0.12);
+  --mtr-selectedHighlight_hover: rgba(212, 149, 88, 0.20);
+}
+
+/* Dark Mode - Green */
+[data-dark="true"] .copper-highlight {
   --mtr-selectedHighlight: rgba(90, 174, 144, 0.15);
   --mtr-selectedHighlight_hover: rgba(90, 174, 144, 0.25);
 }
