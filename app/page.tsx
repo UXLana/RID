@@ -18,6 +18,7 @@ import {
   Archive,
   Download,
   Search,
+  Columns3,
 } from 'lucide-react'
 import LabelWizard from '@/local-components/LabelWizard'
 import Link from 'next/link'
@@ -177,8 +178,8 @@ export default function PackagesPage() {
       </div>
 
       {/* DataTable Toolbar + Table */}
-      <div className={isDark ? 'dark-table' : ''}>
-        <div style={{ marginBottom: spacing.sm }}>
+      <div className={`copper-highlight ${isDark ? 'dark-table' : ''}`}>
+        <div className="mtr-toolbar" style={{ marginBottom: spacing.sm }}>
           <DataTable.Toolbar>
             <DataTable.Toolbar.Left>
               <DataTable.SelectionInfo count={selectedKeys.size}>
@@ -200,7 +201,9 @@ export default function PackagesPage() {
                 style={{ marginBottom: 0, width: '200px' }}
               />
               <DataTable.FilterButton />
-              <DataTable.SortButton />
+              <DataTable.IconButton title="Configure columns">
+                <Columns3 size={16} />
+              </DataTable.IconButton>
             </DataTable.Toolbar.Right>
           </DataTable.Toolbar>
         </div>

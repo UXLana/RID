@@ -160,8 +160,8 @@
   --mtr-hover-onLight: rgba(33, 63, 57, 0.05);
   --mtr-hover-onDark: rgba(255, 255, 255, 0.15);
   --mtr-selected-onLight: rgba(33, 63, 57, 0.09);
-  --mtr-selectedHighlight: rgba(212, 149, 88, 0.12);
-  --mtr-selectedHighlight_hover: rgba(212, 149, 88, 0.20);
+  --mtr-selectedHighlight: #DCE8E5;
+  --mtr-selectedHighlight_hover: #C5D8D4;
   --mtr-focusBorder-onLight: #007E8A;
   --mtr-focusBorder-onDark: rgba(255, 255, 255, 0.65);
   --mtr-scrim: rgba(33, 63, 57, 0.34);
@@ -477,6 +477,23 @@ input[type="checkbox"]:focus-visible {
 [data-dark="true"] body > div {
   background-color: #1e1e1e !important;
   color: #cccccc !important;
+}
+
+/* DS toolbar icon button hover */
+.mtr-toolbar button[type="button"]:not(:disabled):hover {
+  background-color: var(--mtr-hover-onLight) !important;
+  color: var(--mtr-text-highEmphasis-onLight) !important;
+}
+
+[data-dark="true"] .mtr-toolbar button[type="button"]:not(:disabled):hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #cccccc !important;
+}
+
+/* Copper tint for selected rows — scoped to DataTable wrappers only */
+.copper-highlight {
+  --mtr-selectedHighlight: rgba(212, 149, 88, 0.12);
+  --mtr-selectedHighlight_hover: rgba(212, 149, 88, 0.20);
 }
 
 /* Dark scrollbar in dark mode */

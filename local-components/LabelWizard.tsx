@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
   X,
   ChevronDown,
@@ -20,6 +20,8 @@ import {
   Check,
   Square,
   Search,
+  FileText,
+  FileSpreadsheet,
 } from 'lucide-react'
 import { Button, LinearStepper, FullScreenModal, FullScreenModalPanel } from 'mtr-design-system/components'
 import {
@@ -82,7 +84,7 @@ function ProductCardCompact({
         border: borderless ? 'none' : `${productCard.border.width} solid ${productCard.border.color}`,
         borderRadius: borderless ? 0 : productCard.border.radius,
         padding: borderless ? `${spacing.sm} ${spacing.md}` : spacing.sm,
-        backgroundColor: hovered ? colors.hover.onLight : 'transparent',
+        backgroundColor: hovered ? colors.hover.onLight : (borderless ? 'transparent' : colors.surface.light),
         position: 'relative',
         cursor: interactive ? 'pointer' : 'default',
         transition: `background-color ${transitionPresets.default}`,
@@ -647,27 +649,33 @@ function StepNav({
   onNext,
   onPrev,
   lastLabel = 'Finish',
+  loading = false,
+  hideNav = false,
 }: {
   step: number
   total: number
   onNext: () => void
   onPrev: () => void
   lastLabel?: string
+  loading?: boolean
+  hideNav?: boolean
 }) {
+  if (hideNav) return null
   return (
-    <div
+    <nav
+      aria-label="Step navigation"
       style={{ display: 'flex', gap: spacing.xs, marginTop: spacing.xs }}
       onClick={(e) => e.stopPropagation()}
     >
       {step > 0 && (
-        <Button emphasis="mid" size="md" onClick={onPrev}>
+        <Button emphasis="mid" size="md" onClick={onPrev} disabled={loading}>
           Previous
         </Button>
       )}
-      <Button emphasis="high" size="md" onClick={onNext}>
+      <Button emphasis="high" size="md" onClick={onNext} loading={loading}>
         {step === total - 1 ? lastLabel : 'Next'}
       </Button>
-    </div>
+    </nav>
   )
 }
 
@@ -680,6 +688,19 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
   const [previewPage, setPreviewPage] = useState(0)
   const [overrideEnabled, setOverrideEnabled] = useState(false)
   const [overrideProduct, setOverrideProduct] = useState<{ name: string; tagId: string; brand: string; imageUrl: string } | null>(null)
+  const [downloadMenuOpen, setDownloadMenuOpen] = useState(false)
+  const downloadMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!downloadMenuOpen) return
+    function handleClick(e: MouseEvent) {
+      if (downloadMenuRef.current && !downloadMenuRef.current.contains(e.target as Node)) {
+        setDownloadMenuOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [downloadMenuOpen])
   const [formData, setFormData] = useState({
     packageId: packages[0]?.id || '12345-NG-567890',
     productId: packages[0]?.product || 'Cannabis-Infused Blood Raspberries',
@@ -723,19 +744,33 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     'ol114',
   ]
 
+  const [isSaved, setIsSaved] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
   const steps = [
     { id: 'package', label: 'Package', metadata: 'Verify package details' },
     { id: 'template', label: 'Label template', metadata: 'Select layout and design' },
-    { id: 'quantity', label: 'Label quantity', metadata: 'Set print counts' },
     { id: 'settings', label: 'Print job settings', metadata: 'Configure job details' },
   ]
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) setCurrentStep((s) => s + 1)
+    if (currentStep === steps.length - 1) {
+      handleSave()
+    } else {
+      setCurrentStep((s) => s + 1)
+    }
   }
 
   const handlePrev = () => {
     if (currentStep > 0) setCurrentStep((s) => s - 1)
+  }
+
+  const handleSave = () => {
+    setIsSaving(true)
+    setTimeout(() => {
+      setIsSaving(false)
+      setIsSaved(true)
+    }, 1200)
   }
 
   if (!isOpen) return null
@@ -749,6 +784,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     outline: 'none',
     boxSizing: 'border-box',
     height: '36px',
+    backgroundColor: colors.surface.light,
   }
 
   const labelStyle: React.CSSProperties = {
@@ -758,7 +794,66 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     marginBottom: spacing['2xs'],
   }
 
-  const stepContent = [
+  const summaryStyle: React.CSSProperties = {
+    ...typography.body.sm,
+    color: colors.text.lowEmphasis.onLight,
+    backgroundColor: colors.surface.light,
+    border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+    borderRadius: borderRadius.md,
+    padding: `${spacing.sm} ${spacing.md}`,
+  }
+
+  const templateLabels: Record<string, string> = {
+    'mqr': 'MQR', '3x1.5-concentrate': '3×1.5 Concentrate V2', '3x1.5-distillate': '3×1.5 Distillate',
+    '3x1.5-infused': '3×1.5 Infused Preroll', '3x1-disposable': '3×1 Disposable', '3x1-flower': '3×1 Flower',
+    '3wx1.5h-infused': '3w×1.5h Infused Preroll', '2.5x1.5-nv-flower': '2.5×1.5 NV Flower',
+    '3x1.5-nv-fgl-concentrate': '3×1.5 NV Concentrate', '3x1.5-nv-fgl-edible': '3×1.5 NV Edible',
+    '3x1.5-nv-fgl-flower': '3×1.5 NV Flower', '2x1-flower': '2×1 Flower', '4x2-edible': '4×2 Edible',
+    '4x3-retail': '4×3 Retail', '4x6-shipping': '4×6 Shipping', '2x1-vape': '2×1 Vape',
+    '3x2-tincture': '3×2 Tincture', '2.5x1-preroll': '2.5×1 Preroll', '3.5x2-topical': '3.5×2 Topical',
+  }
+
+  const stepContent = isSaved ? [
+    // Saved Step 0: Package (read-only summary)
+    <div key="package-saved" style={{ width: '100%', minWidth: 0 }}>
+      <div style={summaryStyle}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: borderRadius.sm, overflow: 'hidden', flexShrink: 0, backgroundColor: productCard.image.background }}>
+            <img src={formData.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ ...typography.body.sm, fontWeight: fontWeights.semibold, color: colors.text.highEmphasis.onLight }}>{formData.productId}</div>
+            <div style={{ fontFamily: fontFamilies.mono, fontSize: '11px', color: colors.text.lowEmphasis.onLight }}>{formData.packageId}</div>
+          </div>
+        </div>
+        {formData.overrideProduct && (
+          <div style={{ marginTop: spacing.xs, fontSize: '12px' }}>Override: {formData.overrideProduct}</div>
+        )}
+        <div style={{ marginTop: spacing.xs, fontSize: '12px' }}>Packaged: {formData.packagedDate}</div>
+      </div>
+    </div>,
+
+    // Saved Step 1: Template (read-only summary)
+    <div key="template-saved" style={{ width: '100%', minWidth: 0 }}>
+      <div style={summaryStyle}>
+        <div style={{ ...typography.body.sm, color: colors.text.highEmphasis.onLight }}>
+          {templateLabels[formData.template] || 'No template selected'}
+        </div>
+        {formData.layout && <div style={{ fontSize: '12px', marginTop: '2px' }}>{formData.layout}</div>}
+        <div style={{ fontSize: '12px', marginTop: '2px' }}>
+          Offset: {formData.topOffset || '0'}/{formData.leftOffset || '0'} in · Rotate: {formData.rotation}°
+        </div>
+      </div>
+    </div>,
+
+    // Saved Step 2: Settings (read-only summary)
+    <div key="settings-saved" style={{ width: '100%', minWidth: 0 }}>
+      <div style={summaryStyle}>
+        <div style={{ ...typography.body.sm, color: colors.text.highEmphasis.onLight }}>{formData.jobName}</div>
+        <div style={{ fontSize: '12px', marginTop: '2px' }}>Scheduled: {new Date().toISOString().split('T')[0]}</div>
+      </div>
+    </div>,
+  ] : [
     // Step 0: Package
     <div key="package" style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, width: '100%', minWidth: 0 }}>
       <ProductCardCompact
@@ -792,10 +887,11 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       )}
 
       <div>
-        <label style={labelStyle}>Packaged date</label>
+        <label htmlFor="packaged-date" style={labelStyle}>Packaged date</label>
         <div style={{ display: 'flex', gap: spacing.xs }}>
           <div style={{ position: 'relative', flex: 1 }}>
             <input
+              id="packaged-date"
               type="date"
               style={{ ...inputStyle, paddingLeft: spacing['2xl'] }}
               value={formData.packagedDate}
@@ -828,8 +924,9 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     // Step 1: Label template
     <div key="template" style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, width: '100%', minWidth: 0 }}>
       <div>
-        <label style={labelStyle}>Template</label>
+        <label htmlFor="lbl-template" style={labelStyle}>Template</label>
         <select
+          id="lbl-template"
           style={inputStyle}
           value={formData.template}
           onChange={(e) => setFormData({ ...formData, template: e.target.value, layout: '' })}
@@ -858,8 +955,9 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       </div>
       {formData.template && (
         <div>
-          <label style={labelStyle}>Layout</label>
+          <label htmlFor="lbl-layout" style={labelStyle}>Layout</label>
           <select
+            id="lbl-layout"
             style={inputStyle}
             value={formData.layout}
             onChange={(e) => setFormData({ ...formData, layout: e.target.value })}
@@ -873,16 +971,16 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: spacing.md }}>
         <div>
-          <label style={labelStyle}>Top offset (in)</label>
-          <input type="number" step="0.01" style={inputStyle} placeholder="0.00" value={formData.topOffset} onChange={(e) => setFormData({ ...formData, topOffset: e.target.value })} />
+          <label htmlFor="lbl-top-offset" style={labelStyle}>Top offset (in)</label>
+          <input id="lbl-top-offset" type="number" step="0.01" style={inputStyle} placeholder="0.00" value={formData.topOffset} onChange={(e) => setFormData({ ...formData, topOffset: e.target.value })} />
         </div>
         <div>
-          <label style={labelStyle}>Left offset (in)</label>
-          <input type="number" step="0.01" style={inputStyle} placeholder="0.00" value={formData.leftOffset} onChange={(e) => setFormData({ ...formData, leftOffset: e.target.value })} />
+          <label htmlFor="lbl-left-offset" style={labelStyle}>Left offset (in)</label>
+          <input id="lbl-left-offset" type="number" step="0.01" style={inputStyle} placeholder="0.00" value={formData.leftOffset} onChange={(e) => setFormData({ ...formData, leftOffset: e.target.value })} />
         </div>
         <div>
-          <label style={labelStyle}>Rotate (°)</label>
-          <select style={inputStyle} value={formData.rotation} onChange={(e) => setFormData({ ...formData, rotation: e.target.value })}>
+          <label htmlFor="lbl-rotate" style={labelStyle}>Rotate (°)</label>
+          <select id="lbl-rotate" style={inputStyle} value={formData.rotation} onChange={(e) => setFormData({ ...formData, rotation: e.target.value })}>
             <option value="0">0°</option>
             <option value="90">90°</option>
             <option value="180">180°</option>
@@ -893,50 +991,19 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       <StepNav step={1} total={steps.length} onNext={handleNext} onPrev={handlePrev} />
     </div>,
 
-    // Step 2: Label quantity
-    <div key="quantity" style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, width: '100%', minWidth: 0 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md }}>
-        <div>
-          <label style={labelStyle}>Total quantity</label>
-          <input type="number" style={inputStyle} placeholder="Enter quantity" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} />
-        </div>
-        <div>
-          <label style={labelStyle}>Labels per reel</label>
-          <input type="number" style={inputStyle} placeholder="e.g. 500" value={formData.perReel} onChange={(e) => setFormData({ ...formData, perReel: e.target.value })} />
-        </div>
-      </div>
-      <div>
-        <label style={labelStyle}>Reels needed</label>
-        <div
-          style={{
-            ...inputStyle,
-            backgroundColor: colors.surface.lightDarker,
-            display: 'flex',
-            alignItems: 'center',
-            color: (formData.quantity && formData.perReel) ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight,
-          }}
-        >
-          {formData.quantity && formData.perReel
-            ? Math.ceil(parseInt(formData.quantity) / parseInt(formData.perReel))
-            : '—'}
-        </div>
-      </div>
-      <StepNav step={2} total={steps.length} onNext={handleNext} onPrev={handlePrev} />
-    </div>,
-
-    // Step 3: Print job settings
+    // Step 2: Print job settings
     <div key="settings" style={{ display: 'flex', flexDirection: 'column', gap: spacing.md, width: '100%', minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: spacing.md }}>
         <div>
-          <label style={labelStyle}>Job name</label>
-          <input type="text" style={{ ...inputStyle, width: '100%', minWidth: 0 }} value={formData.jobName} onChange={(e) => setFormData({ ...formData, jobName: e.target.value })} />
+          <label htmlFor="lbl-job-name" style={labelStyle}>Job name</label>
+          <input id="lbl-job-name" type="text" style={{ ...inputStyle, width: '100%', minWidth: 0 }} value={formData.jobName} onChange={(e) => setFormData({ ...formData, jobName: e.target.value })} />
         </div>
         <div>
-          <label style={labelStyle}>Scheduled date</label>
-          <input type="date" style={{ ...inputStyle, width: '100%', minWidth: 0 }} defaultValue={new Date().toISOString().split('T')[0]} />
+          <label htmlFor="lbl-sched-date" style={labelStyle}>Scheduled date</label>
+          <input id="lbl-sched-date" type="date" style={{ ...inputStyle, width: '100%', minWidth: 0 }} defaultValue={new Date().toISOString().split('T')[0]} />
         </div>
       </div>
-      <StepNav step={3} total={steps.length} onNext={handleNext} onPrev={handlePrev} lastLabel="Finish" />
+      <StepNav step={2} total={steps.length} onNext={handleNext} onPrev={handlePrev} lastLabel="Save" loading={isSaving} />
     </div>,
   ]
 
@@ -944,26 +1011,128 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     <FullScreenModal
       open={isOpen}
       onClose={onClose}
-      title="New print job"
+      title={isSaved ? formData.jobName : 'New print job'}
+      subtitle={isSaved ? 'Saved' : undefined}
       columns={3}
       headerButtons={[
-        { label: 'Save', emphasis: 'low', onClick: () => {} },
-        { label: 'Print now', emphasis: 'high', onClick: () => {}, disabled: currentStep < steps.length - 1 },
+        ...(isSaved ? [
+          { label: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Download <ChevronDown size={14} /></span>) as unknown as string, emphasis: 'high' as const, onClick: () => setDownloadMenuOpen((v) => !v) },
+        ] : []),
       ]}
     >
-      {/* Left panel: Wizard */}
+      {/* Download dropdown menu */}
+      {downloadMenuOpen && (
+        <div
+          ref={downloadMenuRef}
+          style={{
+            position: 'fixed',
+            top: '52px',
+            right: spacing.lg,
+            zIndex: 9999,
+            backgroundColor: colors.surface.light,
+            border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+            borderRadius: borderRadius.md,
+            boxShadow: shadows.lg,
+            minWidth: '200px',
+            overflow: 'hidden',
+          }}
+        >
+          {[
+            { label: 'Download PDF' },
+            { label: 'Download CSV' },
+          ].map((item, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setDownloadMenuOpen(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                padding: `${spacing.sm} ${spacing.md}`,
+                border: 'none',
+                backgroundColor: 'transparent',
+                cursor: 'pointer',
+                ...typography.body.sm,
+                color: colors.text.highEmphasis.onLight,
+                textAlign: 'left',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.hover.onLight }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Left panel: Wizard + Quantity */}
       <FullScreenModalPanel
         sticky
-        className="col-span-1 h-[calc(100vh-64px)] !p-0 [&>div]:!p-0 [&>div]:!overflow-x-clip !min-w-0"
+        background="muted"
+        className="col-span-1 h-[calc(100vh-64px)] !p-0 [&>div]:!p-0 [&>div]:!overflow-x-clip !min-w-[360px]"
       >
-        <div style={{ width: '100%', padding: `${spacing.xs} ${spacing.xl}`, boxSizing: 'border-box', minWidth: 0 }}>
-          <LinearStepper
-            steps={steps}
-            activeStep={currentStep}
-            onStepChange={setCurrentStep}
-            stepContent={stepContent}
-            clickable
-          />
+        <div style={{ width: '100%', padding: `${spacing.xs} ${spacing['2xl']}`, boxSizing: 'border-box', minWidth: 0, backgroundColor: colors.surface.lightDarker, display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+          <h2
+            id="label-config-heading"
+            style={{
+              ...typography.heading.h6,
+              color: colors.text.highEmphasis.onLight,
+              margin: `${spacing.md} 0 ${spacing.xs}`,
+            }}
+          >
+            Label configuration
+          </h2>
+          <nav aria-labelledby="label-config-heading">
+            <LinearStepper
+              steps={steps}
+              activeStep={isSaved ? steps.length : currentStep}
+              onStepChange={isSaved ? undefined : setCurrentStep}
+              stepContent={stepContent}
+              clickable={!isSaved}
+            />
+          </nav>
+
+          {isSaved && (
+            <section aria-label="Label quantity" style={{ marginTop: spacing.lg, padding: `${spacing.md} 0` }}>
+              <h2 style={{ ...typography.heading.h6, color: colors.text.highEmphasis.onLight, margin: `0 0 ${spacing.xs}` }}>
+                Label quantity
+              </h2>
+              <p style={{ ...typography.body.xs, color: colors.text.lowEmphasis.onLight, margin: `0 0 ${spacing.md}` }}>
+                Adjust print counts anytime
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md }}>
+                  <div>
+                    <label htmlFor="qty-total" style={labelStyle}>Total quantity</label>
+                    <input id="qty-total" type="number" style={inputStyle} placeholder="Enter quantity" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor="qty-per-reel" style={labelStyle}>Labels per reel</label>
+                    <input id="qty-per-reel" type="number" style={inputStyle} placeholder="e.g. 500" value={formData.perReel} onChange={(e) => setFormData({ ...formData, perReel: e.target.value })} />
+                  </div>
+                </div>
+                <div>
+                  <label id="reels-needed-label" style={labelStyle}>Reels needed</label>
+                  <div
+                    role="status"
+                    aria-labelledby="reels-needed-label"
+                    style={{
+                      ...inputStyle,
+                      backgroundColor: colors.surface.lightDarker,
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: (formData.quantity && formData.perReel) ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight,
+                    }}
+                  >
+                    {formData.quantity && formData.perReel
+                      ? Math.ceil(parseInt(formData.quantity) / parseInt(formData.perReel))
+                      : '—'}
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       </FullScreenModalPanel>
 
@@ -974,7 +1143,10 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
         sticky
         className="col-span-2 h-[calc(100vh-64px)] !p-0"
       >
-        <div 
+        <div
+          role="region"
+          aria-label="Label print preview"
+          aria-live="polite"
           style={{ 
             display: 'flex', 
             flexDirection: 'column', 

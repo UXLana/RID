@@ -71,9 +71,6 @@ function DarkModeProvider({ children }: { children: React.ReactNode }) {
 function RIDThemeVars({ children }: { children: React.ReactNode }) {
   useLayoutEffect(() => {
     applyAllThemeVars(ridTheme, document.documentElement)
-    const el = document.documentElement
-    el.style.setProperty('--mtr-selectedHighlight', 'rgba(212, 149, 88, 0.12)')
-    el.style.setProperty('--mtr-selectedHighlight_hover', 'rgba(212, 149, 88, 0.20)')
   }, [])
   return <>{children}</>
 }

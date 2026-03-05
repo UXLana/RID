@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { DataTable, TabBar } from 'mtr-design-system/components'
+import { DataTable, TabBar, Input, Badge } from 'mtr-design-system/components'
 import {
   colors,
   typography,
@@ -16,9 +16,11 @@ import {
   Search,
   RefreshCw,
   Eye,
-  Calendar,
-  Printer
+  Printer,
+  MoreVertical,
+  Columns3,
 } from 'lucide-react'
+import Link from 'next/link'
 import { useDarkMode, dark } from '@/local-components/Providers'
 
 const jobs = [
@@ -29,73 +31,123 @@ const jobs = [
   { id: 'JOB-2026-005', name: 'CBD Tincture Labels', package: '1A4FF030...299', product: 'CBD Tincture', template: 'Compact 2x1', count: 30, date: '2026-02-28', status: 'Complete' },
 ]
 
-const statusStyles: Record<string, { bg: string; text: string }> = {
-  Complete: { bg: colors.surface.success, text: colors.text.success },
-  Printing: { bg: colors.surface.info, text: colors.status.info },
-  Failed: { bg: colors.surface.important, text: colors.text.important },
-  Queued: { bg: colors.surface.warning, text: colors.text.warning },
+const statusBadgeColor: Record<string, 'success' | 'info' | 'error' | 'warning' | 'neutral'> = {
+  Complete: 'success',
+  Printing: 'info',
+  Failed: 'error',
+  Queued: 'warning',
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const style = statusStyles[status] || statusStyles.Queued
   return (
-    <span
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        padding: `${spacing['2xs']} ${spacing.xs}`,
-        borderRadius: borderRadius.full,
-        backgroundColor: style.bg,
-        color: style.text,
-        ...typography.label.sm,
-      }}
-    >
+    <Badge variant="subtle" color={statusBadgeColor[status] || 'neutral'} size="sm">
       {status}
-    </span>
+    </Badge>
   )
 }
 
-function ActionButton({ icon, label, isDark }: { icon: React.ReactNode; label: string; isDark: boolean }) {
+function OverflowMenu({ isDark }: { isDark: boolean }) {
+  const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const ref = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
   return (
-    <button
-      type="button"
-      aria-label={label}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '32px',
-        height: '32px',
-        borderRadius: borderRadius.sm,
-        backgroundColor: hovered
-          ? (isDark ? dark.bgHover : colors.hover.onLight)
-          : 'transparent',
-        color: isDark ? dark.textMuted : colors.icon.enabled.onLight,
-        border: 'none',
-        cursor: 'pointer',
-        transition: `all ${transitionPresets.default}`,
-        padding: 0,
-      }}
-    >
-      {icon}
-    </button>
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button
+        type="button"
+        aria-label="Row actions"
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '36px',
+          height: '36px',
+          borderRadius: borderRadius.md,
+          backgroundColor: hovered || open
+            ? (isDark ? dark.bgHover : colors.hover.onLight)
+            : 'transparent',
+          color: hovered || open
+            ? (isDark ? dark.text : colors.text.highEmphasis.onLight)
+            : (isDark ? dark.textMuted : colors.icon.enabled.onLight),
+          border: 'none',
+          cursor: 'pointer',
+          transition: `all ${transitionPresets.default}`,
+          padding: 0,
+        }}
+      >
+        <MoreVertical size={20} strokeWidth={1.5} />
+      </button>
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            right: 0,
+            top: '100%',
+            marginTop: spacing['2xs'],
+            minWidth: '140px',
+            backgroundColor: isDark ? dark.bgElevated : colors.surface.light,
+            border: `1px solid ${isDark ? dark.border : colors.border.lowEmphasis.onLight}`,
+            borderRadius: borderRadius.md,
+            boxShadow: shadows.lg,
+            zIndex: 50,
+            overflow: 'hidden',
+          }}
+        >
+          {[
+            { label: 'Preview', icon: <Eye size={14} /> },
+            { label: 'Reprint', icon: <RefreshCw size={14} /> },
+            { label: 'Print', icon: <Printer size={14} /> },
+          ].map((item) => (
+            <button
+              key={item.label}
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpen(false) }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? dark.bgHover : colors.hover.onLight }}
+              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: spacing.sm,
+                width: '100%',
+                padding: `${spacing.xs} ${spacing.md}`,
+                border: 'none',
+                backgroundColor: 'transparent',
+                color: isDark ? dark.text : colors.text.highEmphasis.onLight,
+                ...typography.body.sm,
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+            >
+              <span style={{ color: isDark ? dark.textMuted : colors.icon.enabled.onLight, display: 'flex' }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
 export default function PrintJobsPage() {
   const [activeTab, setActiveTab] = useState('active')
   const [searchQuery, setSearchQuery] = useState('')
-  const [searchFocused, setSearchFocused] = useState(false)
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
   const { isDark } = useDarkMode()
 
   const textHigh = isDark ? dark.text : colors.text.highEmphasis.onLight
   const textLow = isDark ? dark.textMuted : colors.text.lowEmphasis.onLight
-  const borderColor = isDark ? dark.border : colors.border.midEmphasis.onLight
-  const borderLow = isDark ? dark.borderSubtle : colors.border.lowEmphasis.onLight
-  const surfaceBg = isDark ? dark.bgElevated : colors.surface.light
 
   const tabs = [
     { id: 'active', label: 'Active' },
@@ -104,31 +156,47 @@ export default function PrintJobsPage() {
   ]
 
   const columns = [
-    { key: 'id', header: 'Job ID', width: '12%' },
-    { key: 'name', header: 'Job Name', width: '18%' },
-    { key: 'package', header: 'Package Tag', width: '14%' },
-    { key: 'product', header: 'Product', width: '18%' },
-    { key: 'template', header: 'Template', width: '14%' },
-    { key: 'count', header: 'Count', width: '8%', align: 'right' as const },
-    { key: 'date', header: 'Print Date', width: '12%' },
     {
+      key: 'name',
+      header: 'Job name',
+      width: '20%',
+      sortable: true,
+      render: (row: any) => (
+        <Link
+          href={`/print-jobs/${row.id}`}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            fontFamily: fontFamilies.body,
+            fontWeight: fontWeights.medium,
+            color: isDark ? colors.brand.lighter : colors.text.action.enabled,
+            textDecoration: 'underline',
+            transition: `color ${transitionPresets.default}`,
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'none' }}
+          onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'underline' }}
+        >
+          {row.name}
+        </Link>
+      ),
+    },
+    { key: 'id', header: 'Job ID', width: '12%' },
+    { key: 'package', header: 'Package tag', width: '14%' },
+    { key: 'product', header: 'Product', width: '16%' },
+    { key: 'template', header: 'Template', width: '12%' },
+    { key: 'count', header: 'Count', width: '7%', align: 'right' as const },
+    { key: 'date', header: 'Print date', width: '10%' },
+    ...(activeTab !== 'archive' ? [{
       key: 'status',
       header: 'Status',
-      width: '10%',
+      width: '9%',
       render: (row: any) => <StatusBadge status={row.status} />,
-    },
+    }] : []),
     {
       key: 'actions',
       header: '',
-      width: '100px',
+      width: '50px',
       align: 'right' as const,
-      render: () => (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: spacing['2xs'] }}>
-          <ActionButton icon={<Eye size={16} />} label="Preview" isDark={isDark} />
-          <ActionButton icon={<RefreshCw size={16} />} label="Reprint" isDark={isDark} />
-          <ActionButton icon={<Printer size={16} />} label="Print" isDark={isDark} />
-        </div>
-      ),
+      render: () => <OverflowMenu isDark={isDark} />,
     },
   ]
 
@@ -165,121 +233,44 @@ export default function PrintJobsPage() {
         />
       </div>
 
-      {/* Filter Bar */}
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: spacing.md,
-          alignItems: 'center',
-          backgroundColor: surfaceBg,
-          padding: spacing.md,
-          borderRadius: borderRadius.lg,
-          border: `1px solid ${borderLow}`,
-          boxShadow: isDark ? 'none' : shadows.xs,
-          marginBottom: spacing.xl,
-        }}
-      >
-        <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-          <Search
-            size={18}
-            style={{
-              position: 'absolute',
-              left: spacing.sm,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              color: isDark ? dark.textMuted : colors.icon.enabled.onLight,
-            }}
-          />
-          <input
-            type="text"
-            placeholder="Search jobs..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            style={{
-              width: '100%',
-              paddingLeft: spacing['2xl'],
-              paddingRight: spacing.md,
-              paddingTop: spacing.xs,
-              paddingBottom: spacing.xs,
-              border: `1px solid ${searchFocused ? (isDark ? '#007acc' : colors.focusBorder.onLight) : borderColor}`,
-              borderRadius: borderRadius.md,
-              ...typography.body.sm,
-              outline: 'none',
-              backgroundColor: isDark ? dark.bgInput : colors.surface.light,
-              color: textHigh,
-              boxShadow: searchFocused ? `0 0 0 3px ${isDark ? 'rgba(0,122,204,0.3)' : colors.selectedHighlight}` : 'none',
-              transition: `all ${transitionPresets.default}`,
-              boxSizing: 'border-box',
-            }}
-          />
+      {/* Toolbar + Table */}
+      <div className={`copper-highlight ${isDark ? 'dark-table' : ''}`}>
+        <div className="mtr-toolbar" style={{ marginBottom: spacing.sm }}>
+          <DataTable.Toolbar>
+            <DataTable.Toolbar.Left>
+              <DataTable.SelectionInfo count={selectedKeys.size}>
+                <DataTable.IconButton title="Reprint selected" label="Reprint">
+                  <RefreshCw size={16} />
+                </DataTable.IconButton>
+                <DataTable.IconButton title="Preview selected" label="Preview">
+                  <Eye size={16} />
+                </DataTable.IconButton>
+              </DataTable.SelectionInfo>
+            </DataTable.Toolbar.Left>
+            <DataTable.Toolbar.Right>
+              <Input
+                placeholder="Search jobs..."
+                startAdornment={<Search size={16} />}
+                size="sm"
+                value={searchQuery}
+                onChange={(val) => setSearchQuery(val)}
+                style={{ marginBottom: 0, width: '200px' }}
+              />
+              <DataTable.FilterButton />
+              <DataTable.IconButton title="Configure columns">
+                <Columns3 size={16} />
+              </DataTable.IconButton>
+            </DataTable.Toolbar.Right>
+          </DataTable.Toolbar>
         </div>
-
-        <div style={{ display: 'flex', gap: spacing.sm }}>
-          <select
-            style={{
-              padding: `${spacing.xs} ${spacing.sm}`,
-              paddingRight: spacing['2xl'],
-              border: `1px solid ${borderColor}`,
-              borderRadius: borderRadius.md,
-              backgroundColor: isDark ? dark.bgInput : colors.surface.light,
-              color: textHigh,
-              ...typography.body.sm,
-              outline: 'none',
-            }}
-          >
-            <option>All Products</option>
-            <option>Blue Dream</option>
-            <option>OG Kush</option>
-          </select>
-
-          <select
-            style={{
-              padding: `${spacing.xs} ${spacing.sm}`,
-              paddingRight: spacing['2xl'],
-              border: `1px solid ${borderColor}`,
-              borderRadius: borderRadius.md,
-              backgroundColor: isDark ? dark.bgInput : colors.surface.light,
-              color: textHigh,
-              ...typography.body.sm,
-              outline: 'none',
-            }}
-          >
-            <option>All Templates</option>
-            <option>Standard 3x2</option>
-            <option>Compact 2x1</option>
-          </select>
-
-          <button
-            type="button"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: spacing.xs,
-              padding: `${spacing.xs} ${spacing.sm}`,
-              border: `1px solid ${borderColor}`,
-              borderRadius: borderRadius.md,
-              backgroundColor: isDark ? dark.bgInput : colors.surface.light,
-              ...typography.body.sm,
-              cursor: 'pointer',
-              color: textHigh,
-            }}
-          >
-            <Calendar size={16} style={{ color: isDark ? dark.textMuted : colors.icon.enabled.onLight }} />
-            Date Range
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className={isDark ? 'dark-table' : ''}>
         <DataTable
           columns={columns}
           data={filteredJobs}
           density="comfortable"
           rowKey={(row) => row.id}
+          selectable
+          selectedKeys={selectedKeys}
+          onSelectionChange={setSelectedKeys}
           emptyState={
             <div
               style={{
