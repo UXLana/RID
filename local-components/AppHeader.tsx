@@ -11,6 +11,7 @@ import {
   borderRadius,
   header,
 } from '@/styles/design-tokens'
+import { useDarkMode, dark } from './Providers'
 
 interface AppHeaderProps {
   orgName?: string
@@ -21,6 +22,8 @@ export default function AppHeader({
   orgName = 'Holistic Industries',
   userInitials = 'JB',
 }: AppHeaderProps) {
+  const { isDark } = useDarkMode()
+
   return (
     <header
       role="banner"
@@ -30,11 +33,12 @@ export default function AppHeader({
         justifyContent: 'space-between',
         height: header.height,
         padding: `0 ${spacing.xl}`,
-        backgroundColor: colors.brand.darker,
+        backgroundColor: isDark ? dark.bgSidebar : colors.brand.darker,
         borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
         fontFamily: fontFamilies.body,
         boxSizing: 'border-box',
         flexShrink: 0,
+        transition: 'background-color 0.2s ease',
       }}
     >
       {/* Left — Logo */}
