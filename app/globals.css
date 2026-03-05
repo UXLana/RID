@@ -404,7 +404,7 @@ input[type="checkbox"]:focus-visible {
 .dark-table th,
 .dark-table thead th {
   background-color: #252526 !important;
-  color: #858585 !important;
+  color: #FFFFFF !important;
   border-bottom-color: #3c3c3c !important;
 }
 
@@ -548,10 +548,10 @@ input[type="checkbox"]:focus-visible {
   color: #FFFFFF !important;
 }
 
-/* Copper tint for selected rows — scoped to DataTable wrappers only */
+/* Green tint for selected rows — scoped to DataTable wrappers only */
 .copper-highlight {
-  --mtr-selectedHighlight: rgba(212, 149, 88, 0.12);
-  --mtr-selectedHighlight_hover: rgba(212, 149, 88, 0.20);
+  --mtr-selectedHighlight: rgba(90, 174, 144, 0.15);
+  --mtr-selectedHighlight_hover: rgba(90, 174, 144, 0.25);
 }
 
 /* Dark scrollbar in dark mode */
