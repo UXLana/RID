@@ -213,7 +213,7 @@ export default function PrintJobsPage() {
           style={{
             fontFamily: fontFamilies.body,
             fontWeight: fontWeights.medium,
-            color: isDark ? colors.brand.lighter : colors.text.action.enabled,
+            color: isDark ? '#5AAE90' : colors.text.action.enabled,
             textDecoration: 'underline',
             transition: `color ${transitionPresets.default}`,
           }}
