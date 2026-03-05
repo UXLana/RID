@@ -144,7 +144,7 @@ export default function Sidebar() {
         width: sidebar.collapsedWidth,
         height: '100%',
         backgroundColor: isDark ? dark.bgSidebar : colors.surface.light,
-        borderRight: 'none',
+        borderRight: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
         flexShrink: 0,
         overflow: 'hidden',
         transition: 'background-color 0.2s ease',
