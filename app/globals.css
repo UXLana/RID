@@ -480,6 +480,7 @@ input[type="checkbox"]:focus-visible {
 [data-dark="true"] button[role="tab"][aria-selected="true"] {
   color: #FFFFFF !important;
   border-bottom-color: #5AAE90 !important;
+  opacity: 1 !important;
 }
 
 /* Override DS CSS variables for neutral dark theme (Teams-like) */
