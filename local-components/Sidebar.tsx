@@ -161,6 +161,7 @@ export default function Sidebar() {
           paddingTop: spacing.md,
           overflowY: 'auto',
           overflowX: 'hidden',
+          gap: spacing.xs,
         }}
       >
         {mainItems.map((item) => (
@@ -178,6 +179,9 @@ export default function Sidebar() {
       <div
         style={{
           marginTop: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: spacing.xs,
         }}
       >
         {/* Dark mode toggle */}
