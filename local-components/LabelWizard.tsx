@@ -37,6 +37,8 @@ import {
   productCard,
 } from '@/styles/design-tokens'
 
+import { useDarkMode, dark } from './Providers'
+
 // =============================================================================
 // TYPES
 // =============================================================================
@@ -71,6 +73,17 @@ function ProductCardCompact({
   borderless?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
+  const { isDark } = useDarkMode()
+
+  const borderColor = isDark ? dark.border : productCard.border.color
+  const bgColor = hovered 
+    ? (isDark ? dark.bgHover : colors.hover.onLight) 
+    : (borderless ? 'transparent' : (isDark ? dark.bgSurface : colors.surface.light))
+  
+  const nameColor = isDark ? dark.text : productCard.typography.name.color
+  const skuColor = isDark ? dark.textMuted : productCard.typography.sku.color
+  const brandBg = isDark ? dark.bgActive : colors.surface.lightDarker
+  const brandColor = isDark ? dark.textMuted : colors.text.lowEmphasis.onLight
 
   return (
     <div
@@ -81,10 +94,10 @@ function ProductCardCompact({
         display: 'flex',
         alignItems: 'flex-start',
         gap: spacing.sm,
-        border: borderless ? 'none' : `${productCard.border.width} solid ${productCard.border.color}`,
+        border: borderless ? 'none' : `${productCard.border.width} solid ${borderColor}`,
         borderRadius: borderless ? 0 : productCard.border.radius,
         padding: borderless ? `${spacing.sm} ${spacing.md}` : spacing.sm,
-        backgroundColor: hovered ? colors.hover.onLight : (borderless ? 'transparent' : colors.surface.light),
+        backgroundColor: bgColor,
         position: 'relative',
         cursor: interactive ? 'pointer' : 'default',
         transition: `background-color ${transitionPresets.default}`,
@@ -94,7 +107,7 @@ function ProductCardCompact({
         style={{
           width: '64px',
           height: '64px',
-          backgroundColor: productCard.image.background,
+          backgroundColor: isDark ? '#fff' : productCard.image.background,
           borderRadius: productCard.image.borderRadius,
           display: 'flex',
           alignItems: 'center',
@@ -116,7 +129,7 @@ function ProductCardCompact({
             fontSize: productCard.typography.name.fontSize,
             fontWeight: productCard.typography.name.fontWeight,
             lineHeight: productCard.typography.name.lineHeight,
-            color: productCard.typography.name.color,
+            color: nameColor,
           }}
         >
           {name}
@@ -127,7 +140,7 @@ function ProductCardCompact({
             fontSize: productCard.typography.sku.fontSize,
             fontWeight: productCard.typography.sku.fontWeight,
             lineHeight: productCard.typography.sku.lineHeight,
-            color: productCard.typography.sku.color,
+            color: skuColor,
             marginTop: '2px',
           }}
         >
@@ -141,11 +154,11 @@ function ProductCardCompact({
               marginTop: spacing.xs,
               padding: `2px ${spacing.xs}`,
               borderRadius: borderRadius.sm,
-              backgroundColor: colors.surface.lightDarker,
+              backgroundColor: brandBg,
               fontFamily: fontFamilies.body,
               fontSize: '11px',
               fontWeight: fontWeights.medium,
-              color: colors.text.lowEmphasis.onLight,
+              color: brandColor,
             }}
           >
             {brand}
@@ -169,7 +182,7 @@ function ProductCardCompact({
             border: 'none',
             background: 'none',
             cursor: 'pointer',
-            color: colors.text.lowEmphasis.onLight,
+            color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight,
             padding: 0,
             flexShrink: 0,
           }}
@@ -199,6 +212,7 @@ function ProductSelect({
   const [isOpen, setIsOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const containerRef = React.useRef<HTMLDivElement>(null)
+  const { isDark } = useDarkMode()
 
   useEffect(() => {
     if (!isOpen) return
@@ -250,14 +264,14 @@ function ProductSelect({
         style={{
           width: '100%',
           padding: `${spacing.xs} ${spacing.sm}`,
-          border: `1px solid ${colors.border.midEmphasis.onLight}`,
+          border: `1px solid ${isDark ? dark.border : colors.border.midEmphasis.onLight}`,
           borderRadius: borderRadius.md,
           ...typography.body.sm,
           outline: 'none',
           boxSizing: 'border-box',
           height: '36px',
-          backgroundColor: colors.surface.light,
-          color: value ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight,
+          backgroundColor: isDark ? dark.bgInput : colors.surface.light,
+          color: value ? (isDark ? dark.text : colors.text.highEmphasis.onLight) : (isDark ? dark.textMuted : colors.text.lowEmphasis.onLight),
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -266,7 +280,7 @@ function ProductSelect({
         }}
       >
         <span>{value || 'Select product'}</span>
-        <ChevronDown size={16} style={{ color: colors.icon.enabled.onLight, flexShrink: 0 }} />
+        <ChevronDown size={16} style={{ color: isDark ? dark.textMuted : colors.icon.enabled.onLight, flexShrink: 0 }} />
       </button>
     )
   }
@@ -275,9 +289,9 @@ function ProductSelect({
     <div
       ref={containerRef}
       style={{
-        border: `1px solid ${colors.border.midEmphasis.onLight}`,
+        border: `1px solid ${isDark ? dark.border : colors.border.midEmphasis.onLight}`,
         borderRadius: borderRadius.lg,
-        backgroundColor: colors.surface.light,
+        backgroundColor: isDark ? dark.bgSurface : colors.surface.light,
         overflow: 'hidden',
       }}
     >
@@ -299,6 +313,7 @@ function ProductSelect({
             boxSizing: 'border-box',
             height: '28px',
             backgroundColor: 'transparent',
+            color: isDark ? dark.text : 'inherit',
           }}
         />
         <Search
@@ -308,7 +323,7 @@ function ProductSelect({
             left: spacing.md,
             top: '50%',
             transform: 'translateY(-50%)',
-            color: colors.icon.enabled.onLight,
+            color: isDark ? dark.textMuted : colors.icon.enabled.onLight,
             pointerEvents: 'none',
           }}
         />
@@ -328,25 +343,25 @@ function ProductSelect({
               width: '20px',
               height: '20px',
               borderRadius: borderRadius.full,
-              backgroundColor: colors.border.midEmphasis.onLight,
+              backgroundColor: isDark ? dark.border : colors.border.midEmphasis.onLight,
               border: 'none',
               cursor: 'pointer',
               padding: 0,
             }}
           >
-            <X size={12} color={colors.surface.light} strokeWidth={2.5} />
+            <X size={12} color={isDark ? dark.text : colors.surface.light} strokeWidth={2.5} />
           </button>
         )}
       </div>
 
       {/* Pinline under search */}
-      <div style={{ height: '1px', backgroundColor: colors.border.lowEmphasis.onLight }} />
+      <div style={{ height: '1px', backgroundColor: isDark ? dark.border : colors.border.lowEmphasis.onLight }} />
 
       {/* Recent label */}
       <div
         style={{
           ...typography.label.sm,
-          color: colors.text.lowEmphasis.onLight,
+          color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight,
           padding: `${spacing.sm} ${spacing.md} 0`,
           marginBottom: spacing.md,
         }}
@@ -359,7 +374,7 @@ function ProductSelect({
         {recentProducts.map((product, idx) => (
           <div key={product.id}>
             {idx > 0 && (
-              <div style={{ height: '1px', backgroundColor: colors.border.lowEmphasis.onLight, margin: `0 ${spacing.md}` }} />
+              <div style={{ height: '1px', backgroundColor: isDark ? dark.border : colors.border.lowEmphasis.onLight, margin: `0 ${spacing.md}` }} />
             )}
             <ProductCardCompact
               name={product.name}
@@ -392,6 +407,7 @@ function CheckboxToggle({
   label: string
   description?: string
 }) {
+  const { isDark } = useDarkMode()
   return (
     <label
       style={{
@@ -408,7 +424,7 @@ function CheckboxToggle({
           borderRadius: borderRadius.xs,
           border: checked
             ? `2px solid ${colors.brand.default}`
-            : `2px solid ${colors.border.midEmphasis.onLight}`,
+            : `2px solid ${isDark ? dark.border : colors.border.midEmphasis.onLight}`,
           backgroundColor: checked ? colors.brand.default : 'transparent',
           display: 'flex',
           alignItems: 'center',
@@ -426,7 +442,7 @@ function CheckboxToggle({
           style={{
             ...typography.body.sm,
             fontWeight: fontWeights.medium,
-            color: colors.text.highEmphasis.onLight,
+            color: isDark ? dark.text : colors.text.highEmphasis.onLight,
           }}
         >
           {label}
@@ -435,7 +451,7 @@ function CheckboxToggle({
           <div
             style={{
               ...typography.body.xs,
-              color: colors.text.lowEmphasis.onLight,
+              color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight,
               marginTop: '1px',
             }}
           >
@@ -505,6 +521,7 @@ function ComplianceLabel({ data, scale = 1, rotated = false }: { data: any; scal
         boxSizing: 'border-box',
         overflow: 'hidden',
         fontSize: `${scale * 100}%`,
+        color: '#191C1B',
       }}
     >
       {/* Header */}
@@ -684,6 +701,7 @@ function StepNav({
 // =============================================================================
 
 export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardProps) {
+  const { isDark } = useDarkMode()
   const [currentStep, setCurrentStep] = useState(0)
   const [previewPage, setPreviewPage] = useState(0)
   const [overrideEnabled, setOverrideEnabled] = useState(false)
@@ -778,27 +796,28 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: `${spacing.xs} ${spacing.sm}`,
-    border: `1px solid ${colors.border.midEmphasis.onLight}`,
+    border: `1px solid ${isDark ? dark.border : colors.border.midEmphasis.onLight}`,
     borderRadius: borderRadius.md,
     ...typography.body.sm,
     outline: 'none',
     boxSizing: 'border-box',
     height: '36px',
-    backgroundColor: colors.surface.light,
+    backgroundColor: isDark ? dark.bgInput : colors.surface.light,
+    color: isDark ? dark.text : colors.text.highEmphasis.onLight,
   }
 
   const labelStyle: React.CSSProperties = {
     ...typography.label.sm,
-    color: colors.text.lowEmphasis.onLight,
+    color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight,
     display: 'block',
     marginBottom: spacing['2xs'],
   }
 
   const summaryStyle: React.CSSProperties = {
     ...typography.body.sm,
-    color: colors.text.lowEmphasis.onLight,
-    backgroundColor: colors.surface.light,
-    border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+    color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight,
+    backgroundColor: isDark ? dark.bgSurface : colors.surface.light,
+    border: `1px solid ${isDark ? dark.border : colors.border.lowEmphasis.onLight}`,
     borderRadius: borderRadius.md,
     padding: `${spacing.sm} ${spacing.md}`,
   }
@@ -818,12 +837,12 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     <div key="package-saved" style={{ width: '100%', minWidth: 0 }}>
       <div style={summaryStyle}>
         <div style={{ display: 'flex', alignItems: 'center', gap: spacing.sm }}>
-          <div style={{ width: '40px', height: '40px', borderRadius: borderRadius.sm, overflow: 'hidden', flexShrink: 0, backgroundColor: productCard.image.background }}>
+          <div style={{ width: '40px', height: '40px', borderRadius: borderRadius.sm, overflow: 'hidden', flexShrink: 0, backgroundColor: isDark ? '#fff' : productCard.image.background }}>
             <img src={formData.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ ...typography.body.sm, fontWeight: fontWeights.semibold, color: colors.text.highEmphasis.onLight }}>{formData.productId}</div>
-            <div style={{ fontFamily: fontFamilies.mono, fontSize: '11px', color: colors.text.lowEmphasis.onLight }}>{formData.packageId}</div>
+            <div style={{ ...typography.body.sm, fontWeight: fontWeights.semibold, color: isDark ? dark.text : colors.text.highEmphasis.onLight }}>{formData.productId}</div>
+            <div style={{ fontFamily: fontFamilies.mono, fontSize: '11px', color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight }}>{formData.packageId}</div>
           </div>
         </div>
         {formData.overrideProduct && (
@@ -836,7 +855,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     // Saved Step 1: Template (read-only summary)
     <div key="template-saved" style={{ width: '100%', minWidth: 0 }}>
       <div style={summaryStyle}>
-        <div style={{ ...typography.body.sm, color: colors.text.highEmphasis.onLight }}>
+        <div style={{ ...typography.body.sm, color: isDark ? dark.text : colors.text.highEmphasis.onLight }}>
           {templateLabels[formData.template] || 'No template selected'}
         </div>
         {formData.layout && <div style={{ fontSize: '12px', marginTop: '2px' }}>{formData.layout}</div>}
@@ -849,7 +868,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     // Saved Step 2: Settings (read-only summary)
     <div key="settings-saved" style={{ width: '100%', minWidth: 0 }}>
       <div style={summaryStyle}>
-        <div style={{ ...typography.body.sm, color: colors.text.highEmphasis.onLight }}>{formData.jobName}</div>
+        <div style={{ ...typography.body.sm, color: isDark ? dark.text : colors.text.highEmphasis.onLight }}>{formData.jobName}</div>
         <div style={{ fontSize: '12px', marginTop: '2px' }}>Scheduled: {new Date().toISOString().split('T')[0]}</div>
       </div>
     </div>,
@@ -893,7 +912,8 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
             <input
               id="packaged-date"
               type="date"
-              style={{ ...inputStyle, paddingLeft: spacing['2xl'] }}
+              className="hide-date-icon"
+              style={{ ...inputStyle, paddingLeft: spacing.sm, paddingRight: spacing['2xl'] }}
               value={formData.packagedDate}
               onChange={(e) => setFormData({ ...formData, packagedDate: e.target.value })}
             />
@@ -901,7 +921,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
               size={16}
               style={{
                 position: 'absolute',
-                left: spacing.sm,
+                right: spacing.sm,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 color: colors.icon.enabled.onLight,
@@ -1014,6 +1034,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       title={isSaved ? formData.jobName : 'New print job'}
       subtitle={isSaved ? 'Saved' : undefined}
       columns={3}
+      className="rid-modal-root"
       headerButtons={[
         ...(isSaved ? [
           { label: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Download <ChevronDown size={14} /></span>) as unknown as string, emphasis: 'high' as const, onClick: () => setDownloadMenuOpen((v) => !v), disabled: !formData.quantity || !formData.perReel },
@@ -1029,8 +1050,8 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
             top: '52px',
             right: spacing.lg,
             zIndex: 9999,
-            backgroundColor: colors.surface.light,
-            border: `1px solid ${colors.border.lowEmphasis.onLight}`,
+            backgroundColor: isDark ? dark.bgSurface : colors.surface.light,
+            border: `1px solid ${isDark ? dark.border : colors.border.lowEmphasis.onLight}`,
             borderRadius: borderRadius.md,
             boxShadow: shadows.lg,
             minWidth: '200px',
@@ -1054,10 +1075,10 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
                 backgroundColor: 'transparent',
                 cursor: 'pointer',
                 ...typography.body.sm,
-                color: colors.text.highEmphasis.onLight,
+                color: isDark ? dark.text : colors.text.highEmphasis.onLight,
                 textAlign: 'left',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = colors.hover.onLight }}
+              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = isDark ? dark.bgHover : colors.hover.onLight }}
               onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent' }}
             >
               {item.label}
@@ -1072,18 +1093,18 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
         background="muted"
         className="col-span-1 h-[calc(100vh-64px)] !p-0 [&>div]:!p-0 [&>div]:!overflow-x-clip !min-w-[360px]"
       >
-        <div style={{ width: '100%', padding: `${spacing.xs} ${spacing['2xl']}`, boxSizing: 'border-box', minWidth: 0, backgroundColor: colors.surface.lightDarker, display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+        <div style={{ width: '100%', padding: `${spacing.xs} ${spacing['2xl']}`, boxSizing: 'border-box', minWidth: 0, backgroundColor: isDark ? dark.bgSidebar : colors.surface.lightDarker, display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
           <h2
             id="label-config-heading"
             style={{
               ...typography.heading.h6,
-              color: colors.text.highEmphasis.onLight,
+              color: isDark ? dark.text : colors.text.highEmphasis.onLight,
               margin: `${spacing.md} 0 ${spacing.xs}`,
             }}
           >
             Label configuration
           </h2>
-          <nav aria-labelledby="label-config-heading">
+          <nav aria-labelledby="label-config-heading" className="rid-stepper-root">
             <LinearStepper
               steps={steps}
               activeStep={isSaved ? steps.length : currentStep}
@@ -1095,10 +1116,10 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
 
           {isSaved && (
             <section aria-label="Label quantity" style={{ marginTop: spacing.lg, padding: `${spacing.md} 0` }}>
-              <h2 style={{ ...typography.heading.h6, color: colors.text.highEmphasis.onLight, margin: `0 0 ${spacing.xs}` }}>
+              <h2 style={{ ...typography.heading.h6, color: isDark ? dark.text : colors.text.highEmphasis.onLight, margin: `0 0 ${spacing.xs}` }}>
                 Label quantity
               </h2>
-              <p style={{ ...typography.body.xs, color: colors.text.lowEmphasis.onLight, margin: `0 0 ${spacing.md}` }}>
+              <p style={{ ...typography.body.xs, color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight, margin: `0 0 ${spacing.md}` }}>
                 Adjust print counts anytime
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
@@ -1119,10 +1140,10 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
                     aria-labelledby="reels-needed-label"
                     style={{
                       ...inputStyle,
-                      backgroundColor: colors.surface.lightDarker,
+                      backgroundColor: isDark ? dark.bgSurface : colors.surface.lightDarker,
                       display: 'flex',
                       alignItems: 'center',
-                      color: (formData.quantity && formData.perReel) ? colors.text.highEmphasis.onLight : colors.text.lowEmphasis.onLight,
+                      color: (formData.quantity && formData.perReel) ? (isDark ? dark.text : colors.text.highEmphasis.onLight) : (isDark ? dark.textMuted : colors.text.lowEmphasis.onLight),
                     }}
                   >
                     {formData.quantity && formData.perReel

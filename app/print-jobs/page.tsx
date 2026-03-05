@@ -42,8 +42,15 @@ const statusBadgeColor: Record<string, 'success' | 'info' | 'error' | 'warning' 
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const { isDark } = useDarkMode()
+  const badgeColor = statusBadgeColor[status] || 'neutral'
   return (
-    <Badge variant="subtle" color={statusBadgeColor[status] || 'neutral'} size="sm">
+    <Badge
+      variant="subtle"
+      color={badgeColor}
+      size="sm"
+      className={isDark ? `dark-badge dark-badge-${badgeColor}` : undefined}
+    >
       {status}
     </Badge>
   )

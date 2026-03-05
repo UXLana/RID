@@ -3,24 +3,25 @@
 import { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback, useMemo } from 'react'
 import { ThemeProvider, ridTheme } from '@/styles/themes'
 import { applyAllThemeVars } from '@/styles/themes/css-vars'
+import { microsoftDarkTheme } from './microsoft-dark-theme'
 
 // =============================================================================
-// DARK PALETTE (Teams-like)
+// DARK PALETTE (Teams-like) — used by local components for inline styles
 // =============================================================================
 
 export const dark = {
-  bg:          '#1F1F1F', // Main background
-  bgSidebar:   '#1B1B1B', // Left rail (slightly darker)
-  bgSurface:   '#2D2D2D', // Cards/Headers
-  bgElevated:  '#2D2D2D', // Dropdowns/Modals
-  bgInput:     '#292929', // Inputs
-  bgHover:     '#3B3B3B', // List item hover
-  bgActive:    '#484848', // Active state
-  border:      '#3E3E3E', // Standard border
-  borderSubtle:'#2D2D2D', // Subtle border
-  text:        '#FFFFFF', // High emphasis
-  textMuted:   '#D1D1D1', // Medium emphasis
-  textFaint:   '#A1A1A1', // Low emphasis
+  bg:          '#1F1F1F',
+  bgSidebar:   '#1B1B1B',
+  bgSurface:   '#2D2D2D',
+  bgElevated:  '#2D2D2D',
+  bgInput:     '#292929',
+  bgHover:     '#3B3B3B',
+  bgActive:    '#484848',
+  border:      '#3E3E3E',
+  borderSubtle:'#2D2D2D',
+  text:        '#FFFFFF',
+  textMuted:   '#D1D1D1',
+  textFaint:   '#A1A1A1',
 }
 
 // =============================================================================
@@ -57,22 +58,19 @@ function DarkModeProvider({ children }: { children: React.ReactNode }) {
   const toggle = useCallback(() => setIsDark((v) => !v), [])
   const value = useMemo(() => ({ isDark, toggle }), [isDark, toggle])
 
+  const activeTheme = isDark ? microsoftDarkTheme : ridTheme
+
+  useLayoutEffect(() => {
+    applyAllThemeVars(activeTheme, document.documentElement)
+  }, [activeTheme])
+
   return (
     <DarkModeContext.Provider value={value}>
-      {children}
+      <ThemeProvider theme={activeTheme}>
+        {children}
+      </ThemeProvider>
     </DarkModeContext.Provider>
   )
-}
-
-// =============================================================================
-// RID THEME APPLIER — sets CSS variables on :root immediately
-// =============================================================================
-
-function RIDThemeVars({ children }: { children: React.ReactNode }) {
-  useLayoutEffect(() => {
-    applyAllThemeVars(ridTheme, document.documentElement)
-  }, [])
-  return <>{children}</>
 }
 
 // =============================================================================
@@ -81,10 +79,6 @@ function RIDThemeVars({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ThemeProvider theme={ridTheme}>
-      <RIDThemeVars>
-        <DarkModeProvider>{children}</DarkModeProvider>
-      </RIDThemeVars>
-    </ThemeProvider>
+    <DarkModeProvider>{children}</DarkModeProvider>
   )
 }

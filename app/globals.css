@@ -322,6 +322,12 @@ p code {
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace !important;
 }
 
+/* Hide native date picker icon */
+.hide-date-icon::-webkit-calendar-picker-indicator {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 /* =============================================================================
    DataTable checkbox — match DS Checkbox component (18px, 1.5px border, 2px radius)
    ============================================================================= */
@@ -568,6 +574,85 @@ input[type="checkbox"]:focus-visible {
   --mtr-selectedHighlight_hover: rgba(90, 174, 144, 0.25);
 }
 
+/* =============================================================================
+   Dark mode Badge overrides (subtle variant)
+   Higher specificity to beat .dark-table span { color: inherit }
+   ============================================================================= */
+
+.dark-badge.dark-badge-success {
+  background-color: rgba(90, 174, 144, 0.20) !important;
+  color: #5AAE90 !important;
+  border-color: transparent !important;
+}
+
+.dark-badge.dark-badge-warning {
+  background-color: rgba(232, 157, 62, 0.20) !important;
+  color: #E89D3E !important;
+  border-color: transparent !important;
+}
+
+.dark-badge.dark-badge-error {
+  background-color: rgba(240, 110, 122, 0.20) !important;
+  color: #F06E7A !important;
+  border-color: transparent !important;
+}
+
+.dark-badge.dark-badge-info {
+  background-color: rgba(91, 155, 213, 0.20) !important;
+  color: #6BA3D6 !important;
+  border-color: transparent !important;
+}
+
+.dark-badge.dark-badge-neutral {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #A1A1A1 !important;
+  border-color: transparent !important;
+}
+
+.dark-badge.dark-badge-brand {
+  background-color: rgba(90, 174, 144, 0.20) !important;
+  color: #5AAE90 !important;
+  border-color: transparent !important;
+}
+
+/* =============================================================================
+   Dark mode Stepper overrides (LinearStepper in .rid-stepper-root)
+   The DS stepper uses hardcoded inline styles. These rules reference theme CSS
+   variables so they auto-update when the theme object swaps.
+   ============================================================================= */
+
+/* All step labels & metadata → muted by default */
+[data-dark="true"] .rid-stepper-root p {
+  color: var(--mtr-text-lowEmphasis-onLight) !important;
+}
+
+/* Active step label → full brightness */
+[data-dark="true"] .rid-stepper-root [aria-current="step"] p:first-of-type {
+  color: var(--mtr-text-highEmphasis-onLight) !important;
+}
+
+/* Completed step label → slightly brighter than metadata */
+[data-dark="true"] .rid-stepper-root [role="button"]:not([aria-current="step"]) p:first-of-type {
+  color: var(--mtr-text-highEmphasis-onLight) !important;
+  opacity: 0.85;
+}
+
+/* Pending step circles — dark bg instead of white */
+[data-dark="true"] .rid-stepper-root li > div:not([aria-current="step"]) div[aria-hidden="true"]:has(> span) {
+  background-color: var(--mtr-surface-dark) !important;
+  border-color: var(--mtr-border-midEmphasis-onLight) !important;
+}
+
+/* Pending step number text — muted */
+[data-dark="true"] .rid-stepper-root li > div:not([aria-current="step"]) div[aria-hidden="true"] > span {
+  color: var(--mtr-text-lowEmphasis-onLight) !important;
+}
+
+/* Connector lines — visible on dark bg */
+[data-dark="true"] .rid-stepper-root ol div[aria-hidden="true"]:empty {
+  background-color: var(--mtr-border-lowEmphasis-onLight) !important;
+}
+
 /* Dark scrollbar in dark mode */
 [data-dark="true"] ::-webkit-scrollbar-track {
   background: #1F1F1F;
@@ -580,3 +665,4 @@ input[type="checkbox"]:focus-visible {
 [data-dark="true"] ::-webkit-scrollbar-thumb:hover {
   background: #606060;
 }
+
