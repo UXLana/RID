@@ -764,6 +764,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
 
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [savedExpandedStep, setSavedExpandedStep] = useState<number | null>(null)
 
   const steps = [
     { id: 'package', label: 'Package', metadata: 'Verify package details' },
@@ -1107,10 +1108,13 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
           <nav aria-labelledby="label-config-heading" className="rid-stepper-root">
             <LinearStepper
               steps={steps}
-              activeStep={isSaved ? steps.length : currentStep}
-              onStepChange={isSaved ? undefined : setCurrentStep}
+              activeStep={isSaved ? (savedExpandedStep ?? steps.length) : currentStep}
+              onStepChange={isSaved
+                ? (idx: number) => setSavedExpandedStep(prev => prev === idx ? null : idx)
+                : setCurrentStep
+              }
               stepContent={stepContent}
-              clickable={!isSaved}
+              clickable
             />
           </nav>
 
@@ -1122,16 +1126,14 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
               <p style={{ ...typography.body.xs, color: isDark ? dark.textMuted : colors.text.lowEmphasis.onLight, margin: `0 0 ${spacing.md}` }}>
                 Adjust print counts anytime
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: spacing.md }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.md }}>
-                  <div>
-                    <label htmlFor="qty-total" style={labelStyle}>Total quantity</label>
-                    <input id="qty-total" type="number" style={inputStyle} placeholder="Enter quantity" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} />
-                  </div>
-                  <div>
-                    <label htmlFor="qty-per-reel" style={labelStyle}>Labels per reel</label>
-                    <input id="qty-per-reel" type="number" style={inputStyle} placeholder="e.g. 500" value={formData.perReel} onChange={(e) => setFormData({ ...formData, perReel: e.target.value })} />
-                  </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: spacing.md }}>
+                <div>
+                  <label htmlFor="qty-total" style={labelStyle}>Total quantity</label>
+                  <input id="qty-total" type="number" style={inputStyle} placeholder="Enter quantity" value={formData.quantity} onChange={(e) => setFormData({ ...formData, quantity: e.target.value })} />
+                </div>
+                <div>
+                  <label htmlFor="qty-per-reel" style={labelStyle}>Labels per reel</label>
+                  <input id="qty-per-reel" type="number" style={inputStyle} placeholder="e.g. 500" value={formData.perReel} onChange={(e) => setFormData({ ...formData, perReel: e.target.value })} />
                 </div>
                 <div>
                   <label id="reels-needed-label" style={labelStyle}>Reels needed</label>
@@ -1140,7 +1142,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
                     aria-labelledby="reels-needed-label"
                     style={{
                       ...inputStyle,
-                      backgroundColor: isDark ? dark.bgSurface : colors.surface.lightDarker,
+                      backgroundColor: isDark ? colors.surface.disabled.onDark : colors.surface.lightDarker,
                       display: 'flex',
                       alignItems: 'center',
                       color: (formData.quantity && formData.perReel) ? (isDark ? dark.text : colors.text.highEmphasis.onLight) : (isDark ? dark.textMuted : colors.text.lowEmphasis.onLight),
