@@ -5,22 +5,22 @@ import { ThemeProvider, ridTheme } from '@/styles/themes'
 import { applyAllThemeVars } from '@/styles/themes/css-vars'
 
 // =============================================================================
-// DARK PALETTE (Microsoft-style neutral dark theme)
+// DARK PALETTE (Teams-like)
 // =============================================================================
 
 export const dark = {
-  bg:          '#1e1e1e',
-  bgSidebar:   '#181818',
-  bgSurface:   '#1e1e1e',
-  bgElevated:  '#2d2d2d',
-  bgInput:     '#313131',
-  bgHover:     'rgba(255,255,255,0.06)',
-  bgActive:    'rgba(255,255,255,0.09)',
-  border:      '#3c3c3c',
-  borderSubtle:'#2d2d2d',
-  text:        '#cccccc',
-  textMuted:   '#858585',
-  textFaint:   '#6e6e6e',
+  bg:          '#1F1F1F', // Main background
+  bgSidebar:   '#1B1B1B', // Left rail (slightly darker)
+  bgSurface:   '#2D2D2D', // Cards/Headers
+  bgElevated:  '#2D2D2D', // Dropdowns/Modals
+  bgInput:     '#292929', // Inputs
+  bgHover:     '#3B3B3B', // List item hover
+  bgActive:    '#484848', // Active state
+  border:      '#3E3E3E', // Standard border
+  borderSubtle:'#2D2D2D', // Subtle border
+  text:        '#FFFFFF', // High emphasis
+  textMuted:   '#D1D1D1', // Medium emphasis
+  textFaint:   '#A1A1A1', // Low emphasis
 }
 
 // =============================================================================

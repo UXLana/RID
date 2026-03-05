@@ -11,6 +11,7 @@ import {
   borderRadius,
   shadows,
   transitionPresets,
+  productCard,
 } from '@/styles/design-tokens'
 import {
   Printer,
@@ -25,11 +26,11 @@ import Link from 'next/link'
 import { useDarkMode, dark } from '@/local-components/Providers'
 
 const packages = [
-  { id: '1A4FF0300000026000000295', product: 'Blue Dream Pre-Roll', type: 'Flower', quantity: '100 ea', date: '2026-02-28' },
-  { id: '1A4FF0300000026000000296', product: 'OG Kush Cartridge', type: 'Concentrate', quantity: '50 ea', date: '2026-03-01' },
-  { id: '1A4FF0300000026000000297', product: 'Sour Diesel Gummies', type: 'Edible', quantity: '200 ea', date: '2026-03-02' },
-  { id: '1A4FF0300000026000000298', product: 'GSC Flower 3.5g', type: 'Flower', quantity: '45 ea', date: '2026-03-02' },
-  { id: '1A4FF0300000026000000299', product: 'CBD Tincture', type: 'Tincture', quantity: '30 ea', date: '2026-03-03' },
+  { id: '1A4FF0300000026000000295', product: 'Blue Dream Pre-Roll', type: 'Flower', quantity: '100 ea', date: '2026-02-28', image: '/blue-dream-preroll.png' },
+  { id: '1A4FF0300000026000000296', product: 'OG Kush Cartridge', type: 'Concentrate', quantity: '50 ea', date: '2026-03-01', image: '/og-kush-cartridge.png' },
+  { id: '1A4FF0300000026000000297', product: 'Sour Diesel Gummies', type: 'Edible', quantity: '200 ea', date: '2026-03-02', image: '/sour-diesel-gummies.png' },
+  { id: '1A4FF0300000026000000298', product: 'GSC Flower 3.5g', type: 'Flower', quantity: '45 ea', date: '2026-03-02', image: '/gsc-flower.png' },
+  { id: '1A4FF0300000026000000299', product: 'CBD Tincture', type: 'Tincture', quantity: '30 ea', date: '2026-03-03', image: '/cbd-tincture.png' },
 ]
 
 function PrintButton({ onClick, isDark }: { onClick: () => void; isDark: boolean }) {
@@ -94,6 +95,25 @@ export default function PackagesPage() {
   }
 
   const columns = [
+    {
+      key: 'thumbnail',
+      header: '',
+      width: '48px',
+      render: (row: any) => (
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: borderRadius.sm,
+            backgroundColor: productCard.image.background,
+            flexShrink: 0,
+            overflow: 'hidden',
+          }}
+        >
+          <img src={row.image} alt={row.product} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      ),
+    },
     {
       key: 'product',
       header: 'Product',

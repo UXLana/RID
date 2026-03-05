@@ -1016,7 +1016,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
       columns={3}
       headerButtons={[
         ...(isSaved ? [
-          { label: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Download <ChevronDown size={14} /></span>) as unknown as string, emphasis: 'high' as const, onClick: () => setDownloadMenuOpen((v) => !v) },
+          { label: (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>Download <ChevronDown size={14} /></span>) as unknown as string, emphasis: 'high' as const, onClick: () => setDownloadMenuOpen((v) => !v), disabled: !formData.quantity || !formData.perReel },
         ] : []),
       ]}
     >

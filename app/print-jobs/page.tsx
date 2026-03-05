@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { DataTable, TabBar, Input, Badge } from 'mtr-design-system/components'
+import { DataTable, TabBar, Input, Badge, Button } from 'mtr-design-system/components'
 import {
   colors,
   typography,
@@ -19,16 +19,19 @@ import {
   Printer,
   MoreVertical,
   Columns3,
+  FileText,
+  FileSpreadsheet,
+  Plus,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useDarkMode, dark } from '@/local-components/Providers'
 
 const jobs = [
-  { id: 'JOB-2026-001', name: 'Blue Dream Batch 1', package: '1A4FF030...295', product: 'Blue Dream Pre-Roll', template: 'Standard 3x2', count: 100, date: '2026-03-03', status: 'Queued' },
-  { id: 'JOB-2026-002', name: 'OG Kush Cartridges', package: '1A4FF030...296', product: 'OG Kush Cartridge', template: 'Compact 2x1', count: 50, date: '2026-03-03', status: 'Printing' },
-  { id: 'JOB-2026-003', name: 'Sour Diesel Gummies', package: '1A4FF030...297', product: 'Sour Diesel Gummies', template: 'Retail 4x3', count: 200, date: '2026-03-02', status: 'Complete' },
-  { id: 'JOB-2026-004', name: 'GSC Flower Run', package: '1A4FF030...298', product: 'GSC Flower 3.5g', template: 'Standard 3x2', count: 45, date: '2026-03-01', status: 'Failed' },
-  { id: 'JOB-2026-005', name: 'CBD Tincture Labels', package: '1A4FF030...299', product: 'CBD Tincture', template: 'Compact 2x1', count: 30, date: '2026-02-28', status: 'Complete' },
+  { id: 'JOB-2026-001', name: 'Blue Dream Batch 1', package: '1A4FF030...295', product: 'Blue Dream Pre-Roll', template: 'Standard 3x2', count: 100, date: '2026-03-03', status: 'Queued', image: '/blue-dream-preroll.png' },
+  { id: 'JOB-2026-002', name: 'OG Kush Cartridges', package: '1A4FF030...296', product: 'OG Kush Cartridge', template: 'Compact 2x1', count: 50, date: '2026-03-03', status: 'Printing', image: '/og-kush-cartridge.png' },
+  { id: 'JOB-2026-003', name: 'Sour Diesel Gummies', package: '1A4FF030...297', product: 'Sour Diesel Gummies', template: 'Retail 4x3', count: 200, date: '2026-03-02', status: 'Complete', image: '/sour-diesel-gummies.png' },
+  { id: 'JOB-2026-004', name: 'GSC Flower Run', package: '1A4FF030...298', product: 'GSC Flower 3.5g', template: 'Standard 3x2', count: 45, date: '2026-03-01', status: 'Failed', image: '/gsc-flower.png' },
+  { id: 'JOB-2026-005', name: 'CBD Tincture Labels', package: '1A4FF030...299', product: 'CBD Tincture', template: 'Compact 2x1', count: 30, date: '2026-02-28', status: 'Complete', image: '/cbd-tincture.png' },
 ]
 
 const statusBadgeColor: Record<string, 'success' | 'info' | 'error' | 'warning' | 'neutral'> = {
@@ -46,26 +49,49 @@ function StatusBadge({ status }: { status: string }) {
   )
 }
 
+import { createPortal } from 'react-dom'
+
 function OverflowMenu({ isDark }: { isDark: boolean }) {
   const [open, setOpen] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const ref = React.useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
 
   React.useEffect(() => {
     if (!open) return
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      // Close if clicking outside the menu
+      // Note: Since menu is in a portal, we can't just check buttonRef containment for the menu part
+      // But we can check if the click target is NOT the button
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        // We also need to check if the click is inside the portal menu, but that's harder without a ref to it
+        // A simpler way for this prototype: close on any click, stopPropagation on menu click
+        setOpen(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  const handleOpen = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.right - 140, // Align right edge of 140px menu to right edge of button
+      })
+    }
+    setOpen((v) => !v)
+  }
+
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <>
       <button
+        ref={buttonRef}
         type="button"
         aria-label="Row actions"
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+        onClick={handleOpen}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -89,26 +115,26 @@ function OverflowMenu({ isDark }: { isDark: boolean }) {
       >
         <MoreVertical size={20} strokeWidth={1.5} />
       </button>
-      {open && (
+      {open && createPortal(
         <div
+          onMouseDown={(e) => e.stopPropagation()} // Prevent closing when clicking inside menu
           style={{
-            position: 'absolute',
-            right: 0,
-            top: '100%',
-            marginTop: spacing['2xs'],
+            position: 'fixed',
+            top: position.top,
+            left: position.left,
             minWidth: '140px',
             backgroundColor: isDark ? dark.bgElevated : colors.surface.light,
             border: `1px solid ${isDark ? dark.border : colors.border.lowEmphasis.onLight}`,
             borderRadius: borderRadius.md,
             boxShadow: shadows.lg,
-            zIndex: 50,
+            zIndex: 9999,
             overflow: 'hidden',
           }}
         >
           {[
-            { label: 'Preview', icon: <Eye size={14} /> },
-            { label: 'Reprint', icon: <RefreshCw size={14} /> },
-            { label: 'Print', icon: <Printer size={14} /> },
+            { label: 'Preview' },
+            { label: 'Download PDF' },
+            { label: 'Download CSV' },
           ].map((item) => (
             <button
               key={item.label}
@@ -130,13 +156,13 @@ function OverflowMenu({ isDark }: { isDark: boolean }) {
                 textAlign: 'left',
               }}
             >
-              <span style={{ color: isDark ? dark.textMuted : colors.icon.enabled.onLight, display: 'flex' }}>{item.icon}</span>
               {item.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   )
 }
 
@@ -156,6 +182,25 @@ export default function PrintJobsPage() {
   ]
 
   const columns = [
+    {
+      key: 'thumbnail',
+      header: '',
+      width: '48px',
+      render: (row: any) => (
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: borderRadius.sm,
+            backgroundColor: '#F5F5F5',
+            flexShrink: 0,
+            overflow: 'hidden',
+          }}
+        >
+          <img src={row.image} alt={row.product} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+      ),
+    },
     {
       key: 'name',
       header: 'Job name',
@@ -185,7 +230,7 @@ export default function PrintJobsPage() {
     { key: 'template', header: 'Template', width: '12%' },
     { key: 'count', header: 'Count', width: '7%', align: 'right' as const },
     { key: 'date', header: 'Print date', width: '10%' },
-    ...(activeTab !== 'archive' ? [{
+    ...(activeTab !== 'archive' && activeTab !== 'complete' ? [{
       key: 'status',
       header: 'Status',
       width: '9%',
@@ -222,8 +267,8 @@ export default function PrintJobsPage() {
         </p>
       </div>
 
-      {/* Tabs */}
-      <div style={{ marginBottom: spacing.md }}>
+      {/* Tabs + Actions */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.md }}>
         <TabBar
           tabs={tabs}
           activeTab={activeTab}
@@ -231,6 +276,11 @@ export default function PrintJobsPage() {
           onDark={isDark}
           hasDivider={false}
         />
+        <div style={{ display: 'flex', gap: spacing.sm }}>
+          <Button emphasis="high" size="md" leftIcon={<Plus size={16} />}>
+            New print job
+          </Button>
+        </div>
       </div>
 
       {/* Toolbar + Table */}

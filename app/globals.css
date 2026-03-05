@@ -403,9 +403,13 @@ input[type="checkbox"]:focus-visible {
 
 .dark-table th,
 .dark-table thead th {
-  background-color: var(--mtr-surface-light) !important;
+  background-color: #252526 !important;
   color: #858585 !important;
   border-bottom-color: #3c3c3c !important;
+}
+
+.dark-table tbody tr {
+  background-color: #1e1e1e !important;
 }
 
 .dark-table tbody tr:hover,
@@ -424,8 +428,8 @@ input[type="checkbox"]:focus-visible {
 
 .dark-table input[type="checkbox"]:checked,
 .dark-table input[type="checkbox"]:indeterminate {
-  background-color: var(--mtr-brand-default) !important;
-  border-color: var(--mtr-brand-default) !important;
+  background-color: #5AAE90 !important;
+  border-color: #5AAE90 !important;
 }
 
 .dark-table button {
@@ -446,37 +450,91 @@ input[type="checkbox"]:focus-visible {
   color: #858585 !important;
 }
 
-/* Override DS CSS variables for neutral dark theme */
+/* Toolbar dark mode — target the DS Toolbar container */
+[data-dark="true"] .mtr-toolbar > div {
+  background-color: #2D2D2D !important;
+  border-color: #3E3E3E !important;
+}
+
+[data-dark="true"] .mtr-toolbar > div span,
+[data-dark="true"] .mtr-toolbar > div button {
+  color: #FFFFFF !important;
+}
+
+[data-dark="true"] .mtr-toolbar > div svg {
+  color: #D1D1D1 !important;
+}
+
+/* Input in dark toolbar */
+[data-dark="true"] .mtr-toolbar input {
+  background-color: #1F1F1F !important;
+  color: #FFFFFF !important;
+  border-color: #3E3E3E !important;
+}
+
+/* DS Tabs in dark mode */
+[data-dark="true"] button[role="tab"] {
+  color: #D1D1D1 !important;
+}
+
+[data-dark="true"] button[role="tab"][aria-selected="true"] {
+  color: #5AAE90 !important;
+  border-bottom-color: #5AAE90 !important;
+}
+
+/* Override DS CSS variables for neutral dark theme (Teams-like) */
 [data-dark="true"] {
-  --mtr-surface-dark: #2d2d2d;
-  --mtr-surface-darkDarker: #1e1e1e;
-  --mtr-surface-light: #1e1e1e;
-  --mtr-surface-lightDarker: #181818;
-  --mtr-hover-onDark: rgba(255,255,255,0.06);
-  --mtr-selected-onLight: rgba(255,255,255,0.09);
-  --color-neutral-0: #1e1e1e;
-  --color-neutral-50: #1e1e1e;
-  --color-neutral-100: #252526;
-  --color-neutral-200: #2d2d2d;
-  --color-neutral-300: #3c3c3c;
-  --color-neutral-400: #555;
-  --color-neutral-500: #6e6e6e;
-  --color-text-high-emphasis: #cccccc;
+  --mtr-surface-dark: #2D2D2D;
+  --mtr-surface-darkDarker: #1F1F1F;
+  --mtr-surface-light: #1F1F1F;
+  --mtr-surface-lightDarker: #1B1B1B;
+  --mtr-surface-success: rgba(90, 174, 144, 0.2);
+  --mtr-surface-info: rgba(110, 97, 255, 0.2);
+  --mtr-surface-important: rgba(220, 12, 34, 0.2);
+  --mtr-surface-warning: rgba(209, 118, 0, 0.2);
+  --mtr-hover-onLight: #3B3B3B;
+  --mtr-hover-onDark: #3B3B3B;
+  --mtr-selected-onLight: #3B3B3B;
+  --mtr-brand-default: #5AAE90;
+  --mtr-brand-lighter: #5AAE90;
+  --mtr-text-action-enabled: #5AAE90;
+  --mtr-text-highEmphasis-onLight: #FFFFFF;
+  --mtr-text-lowEmphasis-onLight: #D1D1D1;
+  --mtr-text-success: #5AAE90;
+  --mtr-text-warning: #E89D3E;
+  --mtr-text-important: #F06E7A;
+  --mtr-border-lowEmphasis-onLight: #3E3E3E;
+  --mtr-border-midEmphasis-onLight: #484848;
+  --mtr-icon-enabled-onLight: #D1D1D1;
+  --color-neutral-0: #1F1F1F;
+  --color-neutral-50: #1F1F1F;
+  --color-neutral-100: #292929;
+  --color-neutral-200: #2D2D2D;
+  --color-neutral-300: #3E3E3E;
+  --color-neutral-400: #484848;
+  --color-neutral-500: #A1A1A1;
+  --color-text-high-emphasis: #FFFFFF;
 }
 
 [data-dark="true"] body {
-  background-color: #1e1e1e !important;
-  color: #cccccc !important;
+  background-color: #1F1F1F !important;
+  color: #FFFFFF !important;
 }
 
 [data-dark="true"] main {
-  background-color: #1e1e1e !important;
+  background-color: #1F1F1F !important;
 }
 
 /* Ensure all top-level containers go dark */
 [data-dark="true"] body > div {
-  background-color: #1e1e1e !important;
-  color: #cccccc !important;
+  background-color: #1F1F1F !important;
+  color: #FFFFFF !important;
+}
+
+/* DS Buttons in dark mode — RID Green */
+[data-dark="true"] button[style*="background-color"] {
+  --mtr-brand-default: #5AAE90;
+  --mtr-brand-darker: #4A9A7E;
 }
 
 /* DS toolbar icon button hover */
@@ -486,8 +544,8 @@ input[type="checkbox"]:focus-visible {
 }
 
 [data-dark="true"] .mtr-toolbar button[type="button"]:not(:disabled):hover {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  color: #cccccc !important;
+  background-color: #3B3B3B !important;
+  color: #FFFFFF !important;
 }
 
 /* Copper tint for selected rows — scoped to DataTable wrappers only */
@@ -498,13 +556,13 @@ input[type="checkbox"]:focus-visible {
 
 /* Dark scrollbar in dark mode */
 [data-dark="true"] ::-webkit-scrollbar-track {
-  background: #252526;
+  background: #1F1F1F;
 }
 
 [data-dark="true"] ::-webkit-scrollbar-thumb {
-  background: #555;
+  background: #484848;
 }
 
 [data-dark="true"] ::-webkit-scrollbar-thumb:hover {
-  background: #6e6e6e;
+  background: #606060;
 }
