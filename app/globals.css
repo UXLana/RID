@@ -452,8 +452,8 @@ input[type="checkbox"]:focus-visible {
 
 /* Toolbar dark mode — target the DS Toolbar container */
 [data-dark="true"] .mtr-toolbar > div {
-  background-color: #2D2D2D !important;
-  border-color: #3E3E3E !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
 }
 
 [data-dark="true"] .mtr-toolbar > div span,
@@ -467,7 +467,7 @@ input[type="checkbox"]:focus-visible {
 
 /* Input in dark toolbar */
 [data-dark="true"] .mtr-toolbar input {
-  background-color: #1F1F1F !important;
+  background-color: #292929 !important;
   color: #FFFFFF !important;
   border-color: #3E3E3E !important;
 }
