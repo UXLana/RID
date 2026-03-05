@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useDarkMode, dark } from '@/local-components/Providers'
+import LabelWizard from '@/local-components/LabelWizard'
 
 const jobs = [
   { id: 'JOB-2026-001', name: 'Blue Dream Batch 1', package: '1A4FF030...295', product: 'Blue Dream Pre-Roll', template: 'Standard 3x2', count: 100, date: '2026-03-03', status: 'Queued', image: '/blue-dream-preroll.png' },
@@ -139,7 +140,6 @@ function OverflowMenu({ isDark }: { isDark: boolean }) {
           }}
         >
           {[
-            { label: 'Preview' },
             { label: 'Download PDF' },
             { label: 'Download CSV' },
           ].map((item) => (
@@ -178,6 +178,7 @@ export default function PrintJobsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set())
   const { isDark } = useDarkMode()
+  const [previewJob, setPreviewJob] = useState<any | null>(null)
 
   const textHigh = isDark ? dark.text : colors.text.highEmphasis.onLight
   const textLow = isDark ? dark.textMuted : colors.text.lowEmphasis.onLight
@@ -214,21 +215,25 @@ export default function PrintJobsPage() {
       width: '20%',
       sortable: true,
       render: (row: any) => (
-        <Link
-          href={`/print-jobs/${row.id}`}
-          onClick={(e) => e.stopPropagation()}
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); setPreviewJob(row) }}
           style={{
             fontFamily: fontFamilies.body,
             fontWeight: fontWeights.medium,
             color: isDark ? '#5AAE90' : colors.text.action.enabled,
             textDecoration: 'underline',
             transition: `color ${transitionPresets.default}`,
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            cursor: 'pointer',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.textDecoration = 'none' }}
           onMouseLeave={(e) => { e.currentTarget.style.textDecoration = 'underline' }}
         >
           {row.name}
-        </Link>
+        </button>
       ),
     },
     { key: 'id', header: 'Job ID', width: '12%' },
@@ -345,6 +350,17 @@ export default function PrintJobsPage() {
           }
         />
       </div>
+
+      {previewJob && (
+        <LabelWizard
+          isOpen={!!previewJob}
+          onClose={() => setPreviewJob(null)}
+          packages={[{ id: previewJob.package, product: previewJob.product }]}
+          initialSaved
+          initialJobName={previewJob.name}
+          initialQuantity={previewJob.count}
+        />
+      )}
     </div>
   )
 }

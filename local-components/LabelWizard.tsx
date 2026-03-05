@@ -47,6 +47,9 @@ interface LabelWizardProps {
   isOpen: boolean
   onClose: () => void
   packages: any[]
+  initialSaved?: boolean
+  initialJobName?: string
+  initialQuantity?: number
 }
 
 // =============================================================================
@@ -700,7 +703,7 @@ function StepNav({
 // MAIN: LABEL WIZARD
 // =============================================================================
 
-export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardProps) {
+export default function LabelWizard({ isOpen, onClose, packages, initialSaved = false, initialJobName, initialQuantity }: LabelWizardProps) {
   const { isDark } = useDarkMode()
   const [currentStep, setCurrentStep] = useState(0)
   const [previewPage, setPreviewPage] = useState(0)
@@ -731,9 +734,9 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     topOffset: '',
     leftOffset: '',
     rotation: '0',
-    quantity: '',
-    perReel: '',
-    jobName: `Job-${new Date().toISOString().split('T')[0]}-001`,
+    quantity: initialQuantity ? String(initialQuantity) : '',
+    perReel: initialQuantity ? '500' : '',
+    jobName: initialJobName || `Job-${new Date().toISOString().split('T')[0]}-001`,
   })
 
   // When override is disabled, clear the selection
@@ -762,7 +765,7 @@ export default function LabelWizard({ isOpen, onClose, packages }: LabelWizardPr
     'ol114',
   ]
 
-  const [isSaved, setIsSaved] = useState(false)
+  const [isSaved, setIsSaved] = useState(initialSaved)
   const [isSaving, setIsSaving] = useState(false)
   const [savedExpandedStep, setSavedExpandedStep] = useState<number | null>(null)
 
